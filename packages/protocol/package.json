@@ -10,5 +10,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:prop": "vitest run prop.test"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
   }
 }

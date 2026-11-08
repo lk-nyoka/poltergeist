@@ -1,6 +1,6 @@
 /**
  * MutantOverride — one seam override that breaks exactly one contract rule (brief §6.1).
- * impl is Function so the seam registry can call it with the original's arguments.
+ * impl is called as impl(original, ...args). For render seams, impl(original) returns a component.
  * id is a random hash, never a descriptive name.
  */
 export type MutantOverride = {
@@ -25,3 +25,7 @@ export const MUTANT_ID = /^[0-9a-f]{8,64}$/;
 export function isWellFormedOverride(o: MutantOverride): boolean {
   return MUTANT_ID.test(o.id) && SEAM_KEY.test(o.seam) && typeof o.impl === 'function';
 }
+
+export * from './manifest.js';
+export * from './possess.js';
+export * from './api.js';
