@@ -1,0 +1,11 @@
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    passWithNoTests: true,
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['**/node_modules/**', '**/.next/**'],
+    setupFiles: [fileURLToPath(new URL('./vitest.setup.ts', import.meta.url))],
+  },
+});

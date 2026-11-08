@@ -1,0 +1,68 @@
+{
+  "name": "judge",
+  "description": "Reviews each finished spec against the brief and the judging rubric. Read-only: never writes files.",
+  "resources": [
+    "file://.kiro/steering/product.md",
+    "file://.kiro/steering/tech.md",
+    "file://.kiro/steering/structure.md",
+    "file://.kiro/steering/ghost-impatient.md",
+    "file://.kiro/steering/ghost-fraudster.md",
+    "file://.kiro/steering/ghost-nightowl.md",
+    "file://.kiro/steering/ghost-glitch.md"
+  ],
+  "tools": [
+    "read"
+  ],
+  "permissions": {
+    "rules": [
+      {
+        "capability": "fs_write",
+        "match": [
+          "**"
+        ],
+        "effect": "deny"
+      },
+      {
+        "capability": "fs_read",
+        "match": [
+          "apps/shop/src/mutants/**",
+          "bench/mutant-manifest.json",
+          "bench/manifest.sha256",
+          "bench/.private/**",
+          ".kiro/specs/S03-mutation-engine/**",
+          ".kiro/steering/mutants.md"
+        ],
+        "effect": "deny"
+      }
+    ]
+  },
+  "hooks": [
+    {
+      "name": "protect-mutants-read",
+      "trigger": "PreToolUse",
+      "matcher": "read",
+      "action": {
+        "type": "command",
+        "command": "node scripts/protect-mutants.mjs"
+      }
+    },
+    {
+      "name": "protect-mutants-write",
+      "trigger": "PreToolUse",
+      "matcher": "write",
+      "action": {
+        "type": "command",
+        "command": "node scripts/protect-mutants.mjs"
+      }
+    },
+    {
+      "name": "protect-mutants-shell",
+      "trigger": "PreToolUse",
+      "matcher": "shell",
+      "action": {
+        "type": "command",
+        "command": "node scripts/protect-mutants.mjs"
+      }
+    }
+  ]
+}

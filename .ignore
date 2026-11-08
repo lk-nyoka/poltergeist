@@ -1,0 +1,5 @@
+apps/shop/src/mutants
+bench/mutant-manifest.json
+bench/manifest.sha256
+bench/.private
+.kiro/specs/S03-mutation-engine

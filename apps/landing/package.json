@@ -1,0 +1,11 @@
+{
+  "name": "@poltergeist/landing",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"console.log('landing: built in S13')\"",
+    "test": "vitest run",
+    "test:prop": "vitest run prop.test"
+  }
+}

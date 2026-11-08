@@ -1,0 +1,41 @@
+{
+  "name": "mutant-maker",
+  "description": "Writes the S03 mutant overrides and the manifest. Must always be started as the main session agent, never as a sub-agent of builder. Never describe individual mutants outside the mutant-maker paths.",
+  "resources": [
+    "file://.kiro/steering/product.md",
+    "file://.kiro/steering/tech.md",
+    "file://.kiro/steering/structure.md",
+    "file://.kiro/steering/ghost-impatient.md",
+    "file://.kiro/steering/ghost-fraudster.md",
+    "file://.kiro/steering/ghost-nightowl.md",
+    "file://.kiro/steering/ghost-glitch.md",
+    "file://.kiro/steering/mutants.md"
+  ],
+  "permissions": {
+    "rules": [
+      {
+        "capability": "fs_write",
+        "match": [
+          "apps/shop/src/mutants/**",
+          "bench/mutant-manifest.json",
+          "bench/manifest.sha256",
+          ".kiro/specs/S03-mutation-engine/**"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "**"
+        ],
+        "exclude": [
+          "apps/shop/src/mutants/**",
+          "bench/mutant-manifest.json",
+          "bench/manifest.sha256",
+          ".kiro/specs/S03-mutation-engine/**"
+        ],
+        "effect": "deny"
+      }
+    ]
+  }
+}

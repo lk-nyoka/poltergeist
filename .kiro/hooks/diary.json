@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Diary",
+      "trigger": "PostTaskExec",
+      "description": "Appends a diary entry to docs/kiro-diary.md after each spec task completes, using the Appendix D template. Skips S03.",
+      "action": {
+        "type": "agent",
+        "prompt": "If the active spec is S03-mutation-engine, reply 'skipped' and change nothing. Otherwise append an entry to docs/kiro-diary.md using this template exactly:\n\n## 2026-11-DD · Spec Sxx · task N\nKiro surface: IDE / CLI / Web / Crew · Agent: builder / ghost-smith / judge\nFeature used: spec / steering / hook / PBT / MCP / power / checkpoint\nWhat happened (2–3 lines):\nWhat it changed for the build (1 line):\nScreenshot: docs/img/YYYYMMDD-x.png\n\nFill in the date (today), the spec and task number from the task that just completed, the surface and agent actually used, and the feature most relevant to what just happened. Write 2–3 sentences for \"What happened\" and 1 sentence for \"What it changed\". Leave the Screenshot line as a placeholder. Do not invent facts — only record what actually occurred in this task execution."
+      }
+    }
+  ]
+}
