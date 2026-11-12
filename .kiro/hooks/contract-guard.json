@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Contract guard",
+      "trigger": "PostFileSave",
+      "description": "Runs the Haunted Shop test suite (including the C1–C12 contract suite) whenever the agent saves a file under apps/shop/. A non-zero exit sends the failing rules back to the agent to fix before it continues.",
+      "matcher": "apps[\\\\/]shop[\\\\/]",
+      "action": {
+        "type": "command",
+        "command": "pnpm --filter @poltergeist/shop test",
+        "timeout": 300
+      }
+    }
+  ]
+}

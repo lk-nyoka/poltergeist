@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Mutant check",
+      "trigger": "PostFileSave",
+      "enabled": false,
+      "description": "Rule-level mutant check: runs the contract suite once per manifest entry and prints counts only. Created DISABLED because a full sweep takes minutes; run it by hand, or enable this hook in the Hooks panel when wanted.",
+      "matcher": "apps[\\\\/]shop[\\\\/]src[\\\\/]mutants[\\\\/]",
+      "action": {
+        "type": "command",
+        "command": "pnpm --filter @poltergeist/scorer mutant-check",
+        "timeout": 1800
+      }
+    }
+  ]
+}
