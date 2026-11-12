@@ -25,16 +25,12 @@ export async function withPage<T>(fn: (ctx: RequestCtx) => Promise<T>): Promise<
   return requestContext.run(ctx, () => fn(ctx));
 }
 
-/** Runs fn with an empty mutant set (used by GET /api/oracle/products). */
+/**
+ * Runs fn with an empty mutant set (used by GET /api/oracle/products).
+ * Needs no request headers, so it also works when a route handler is called directly in tests.
+ */
 export async function cleanContext<T>(fn: (ctx: RequestCtx) => Promise<T>): Promise<T> {
-  const hdrs = await headers();
-  const raw = (hdrs as unknown as Headers).get(HEADER) ?? '';
-  const t = raw ? await unsealToken(raw) : null;
-  const ctx: RequestCtx = {
-    sid: t?.sid ?? crypto.randomUUID(),
-    token: raw,
-    mutants: new Set(),
-  };
+  const ctx: RequestCtx = { sid: '', token: '', mutants: new Set() };
   return requestContext.run(ctx, () => fn(ctx));
 }
 

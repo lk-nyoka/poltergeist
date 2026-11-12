@@ -26,6 +26,9 @@ export type Order = {
   items: CartLine[];
   couponCodes: string[];
   totalCents: number;
+  /** Customer details from checkout: validated by text/validateText, stored exactly as submitted (C10). */
+  name?: string;
+  address?: string;
   createdAt: number;
 };
 
