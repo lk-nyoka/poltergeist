@@ -5,7 +5,7 @@
       "name": "PBT on Save",
       "trigger": "PostFileSave",
       "description": "Runs the property tests for the affected package (100 runs) whenever a file under packages/ is saved.",
-      "matcher": "packages/",
+      "matcher": "packages[\\\\/]",
       "action": {
         "type": "command",
         "command": "node scripts/pbt-on-save.mjs",
