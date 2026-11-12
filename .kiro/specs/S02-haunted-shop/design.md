@@ -544,7 +544,10 @@ Tested: route-handler tests importing `@/lib/session` pass.
     - `public: k`
     - `unknown seams: u`
 
-  It never prints ids, seams or rule-to-id pairs. The S03 rule-level check and the S05 oracle-level check extend this script later.
+  It never prints ids, seams or rule-to-id pairs.
+  - **Rule-level mode (built in S02, used in S03).** For each manifest entry, run the shop contract suite with `PG_MUTANTS=<id>` (`vitest run --reporter=json` in `apps/shop`). The entry is OK only if at least one test fails and every failing test's `[Cn]` tag equals the entry's rule. The clean suite must also pass. Output: `checked N · ok K · wrong-rule W · undetected U · clean-suite PASS|FAIL`. It must be built here because mutant-maker can only write mutant files. The S05 oracle-level check extends it later.
+  - `pnpm --filter @poltergeist/shop seams:list` prints `listSeamKeys()`, so mutant-maker can target real seams.
+  - Contract tests get their session through `contract/helpers.ts` `contractSession()`, which seals `PG_MUTANTS` into the token, so the same suite runs clean or under any one mutant.
 - **`mutant-check` hook:** create it in the Hooks panel, **disabled**: File Save, pattern `apps/shop/src/mutants/`, shell `pnpm --filter @poltergeist/scorer mutant-check`.
 
 ## 17. Environment (`.env.example` already lists these)

@@ -105,6 +105,7 @@
   - Create `apps/shop/src/contract/*.test.ts` — one file per rule group, test names starting with `[Cn]`
   - Every test calls route handlers directly with `new Request(...)` and a fresh `MemoryStore` via `_resetMemoryStoreForTest()`
   - Tests use `requestContext` from the registry to apply mutant sets (via `process.env.PG_MUTANTS`)
+  - Create `apps/shop/src/contract/helpers.ts` with `contractSession()`: seals a token whose `mutants` = `process.env.PG_MUTANTS` split on commas (empty by default) and returns headers `{ 'x-pg-session': token }`. Every contract request uses it. Component tests (C7–C9) render inside `requestContext.run({ sid, token, mutants }, …)` with the same mutant set
   - All C1–C12 tests pass on the clean shop
   - P4 property test: any valid cart → total = independent formula, ≥ 0, one debit per intent
   - P5 property test: valid strings round-trip exactly; invalid → 400
@@ -122,6 +123,9 @@
   - Add run script `"mutant-check": "tsx src/mutant-check.ts"` to `packages/scorer/package.json`; add `tsx` (latest 4.x, pinned) as a devDependency with justification: runs TS scripts on Windows without a build step
   - S02 behaviour: missing manifest → print `no manifest yet` and exit 0; present manifest → validate with `MutantManifest`, print counts only
   - Run `pnpm --filter @poltergeist/scorer mutant-check` — must print `no manifest yet` and exit 0
+  - **Rule-level mode (needed by S03; mutant-maker cannot write this script):** when the manifest exists, for each entry run `vitest run --reporter=json` in `apps/shop` with `PG_MUTANTS=<id>`, collect the `[Cn]` tags of failing tests, and count the entry OK only if at least one test fails and every failing tag equals the entry's rule. Also run the suite once with no mutants (must be all green). Print only `checked N · ok K · wrong-rule W · undetected U · clean-suite PASS|FAIL`; exit 1 unless every entry is OK and the clean suite passes. Never print ids, seams or rules per entry
+  - Add `"seams:list": "tsx scripts/list-seams.ts"` to `apps/shop/package.json`: imports `src/seams/all.ts` and prints `listSeamKeys()`, one per line (mutant-maker uses this list in S03)
+  - Write a scorer unit test for the rule-level logic using a fake runner and `test/fixtures/manifest.fixture.json` (never the real manifest)
 
 - [ ] 14. Cross-site e2e check
   - Create `apps/shop/e2e/crosssite.spec.ts`, `apps/shop/e2e/parent-server.mjs`, and `apps/shop/playwright.config.ts` per design §15
