@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getMemoryStore, _resetMemoryStoreForTest } from './memory';
 
 describe('MemoryStore', () => {
@@ -53,6 +53,17 @@ describe('MemoryStore', () => {
     const aCustomer = await store.listLedger('a', 'customer');
     expect(aCustomer).toHaveLength(1);
     expect(aCustomer[0]!.amountCents).toBe(-100);
+  });
+
+  it('is ONE process-wide store even when the module is loaded twice (Next bundles routes and pages separately)', async () => {
+    const first = await import('./memory');
+    first.getMemoryStore().ensureSession('shared-check');
+    await first.getMemoryStore().saveCart({ id: 'c', sid: 'shared-check', version: 5, lines: [], couponCode: null });
+    vi.resetModules();
+    const second = await import('./memory'); // a second, independent copy of the module
+    expect(second).not.toBe(first);
+    expect(second.getMemoryStore()).toBe(first.getMemoryStore());
+    expect((await second.getMemoryStore().getCart('shared-check')).version).toBe(5);
   });
 
   it('health returns true', async () => {

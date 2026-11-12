@@ -1,0 +1,7 @@
+# Haunted Shop is an INTENTIONALLY VULNERABLE demo, built to be broken by the Poltergeist ghosts.
+# Every visitor gets an isolated, per-session sandbox: fake money, synthetic data, deleted after 24 hours.
+# Its bugs are the point, so please do not report them as vulnerabilities.
+# Real problems with the Poltergeist project itself are welcome through the issue tracker below.
+Contact: https://github.com/lk-nyoka/poltergeist/issues
+Expires: 2027-02-28T00:00:00.000Z
+Preferred-Languages: en

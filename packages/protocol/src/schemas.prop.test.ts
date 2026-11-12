@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { MutantManifest } from './manifest.js';
-import { PossessOptions } from './possess.js';
+import { MutantManifest } from './manifest';
+import { PossessOptions } from './possess';
 
 describe('MutantManifest schema', () => {
   it('valid manifest round-trips through parse', () => {

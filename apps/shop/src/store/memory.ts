@@ -120,12 +120,16 @@ class MemoryStoreImpl implements Store {
   }
 }
 
-// Module-level singleton
-let instance: MemoryStoreImpl | null = null;
+// Process-wide singleton, anchored on globalThis rather than a module-level `let`.
+// A Next.js build bundles route handlers and server pages as separate module graphs, so a plain
+// module variable would give API routes and pages two different stores (a page would never see the
+// cart an API call just changed). The benchmark runs on this store under `next start`, so it must be shared.
+const STORE_KEY = Symbol.for('poltergeist.memoryStore');
+type StoreHolder = { [STORE_KEY]?: MemoryStoreImpl };
+const holder = globalThis as unknown as StoreHolder;
 
 function getInstance(): MemoryStoreImpl {
-  if (!instance) instance = new MemoryStoreImpl();
-  return instance;
+  return (holder[STORE_KEY] ??= new MemoryStoreImpl());
 }
 
 /**
@@ -133,7 +137,7 @@ function getInstance(): MemoryStoreImpl {
  * Only *.test.ts files may call this.
  */
 export function _resetMemoryStoreForTest(): void {
-  instance = new MemoryStoreImpl();
+  holder[STORE_KEY] = new MemoryStoreImpl();
 }
 
 export function getMemoryStore(): Store {

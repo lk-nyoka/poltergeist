@@ -26,6 +26,8 @@ export function isWellFormedOverride(o: MutantOverride): boolean {
   return MUTANT_ID.test(o.id) && SEAM_KEY.test(o.seam) && typeof o.impl === 'function';
 }
 
-export * from './manifest.js';
-export * from './possess.js';
-export * from './api.js';
+// Extensionless on purpose: this package is consumed as TypeScript source, and Turbopack does not
+// map './x.js' to './x.ts' (tsconfig uses moduleResolution "Bundler", which allows extensionless).
+export * from './manifest';
+export * from './possess';
+export * from './api';

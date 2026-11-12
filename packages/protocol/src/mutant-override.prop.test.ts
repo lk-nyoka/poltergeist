@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { isWellFormedOverride, type MutantOverride } from './index.js';
+import { isWellFormedOverride, type MutantOverride } from './index';
 
 const hex = fc.string({
   unit: fc.constantFrom(...('0123456789abcdef' as unknown as string[])),

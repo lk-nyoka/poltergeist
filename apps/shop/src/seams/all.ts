@@ -9,4 +9,4 @@ import '@/domain/checkout';
 import '@/domain/orders';
 import '@/domain/reviews';
 import '@/components/ReviewBody';
-// Task 9 adds the remaining render seams (ProductImage, PayButton, CheckoutDialog, CartLine).
+import '@/components/render-seams';
