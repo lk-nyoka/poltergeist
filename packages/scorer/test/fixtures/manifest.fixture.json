@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "mutants": [
+    { "id": "f1x0000000000001", "rule": "C1", "seam": "checkout/claim", "public": true },
+    { "id": "f1x0000000000002", "rule": "C3", "seam": "cart/addLine", "public": false },
+    { "id": "f1x0000000000003", "rule": "C4", "seam": "cart/applyCoupon", "public": false },
+    { "id": "f1x0000000000004", "rule": "C8", "seam": "render/ProductImage", "public": true },
+    { "id": "f1x0000000000005", "rule": "C10", "seam": "text/validateText", "public": false },
+    { "id": "f1x0000000000006", "rule": "C12", "seam": "reviews/add", "public": false }
+  ]
+}

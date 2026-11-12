@@ -1,3 +1,12 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# esbuild (pulled in by tsx) only re-checks its platform binary in its postinstall script,
+# and pnpm already installs that binary as an optional dependency — so skipping the script
+# is safe. This is the correct pnpm 10+ field to acknowledge that and silence the warning.
+allowBuilds:
+  esbuild: set this to true or false
+
+ignoredBuiltDependencies:
+  - esbuild

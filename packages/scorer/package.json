@@ -9,6 +9,10 @@
     "build": "tsc -p . --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:prop": "vitest run prop.test"
+    "test:prop": "vitest run prop.test",
+    "mutant-check": "tsx src/mutant-check.ts"
+  },
+  "dependencies": {
+    "@poltergeist/protocol": "workspace:*"
   }
 }

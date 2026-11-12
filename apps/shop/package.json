@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
+    "seams:list": "tsx scripts/seams-list.ts",
     "test": "vitest run",
     "test:prop": "vitest run prop.test"
   },
