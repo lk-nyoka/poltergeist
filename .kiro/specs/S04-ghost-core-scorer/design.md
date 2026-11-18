@@ -187,3 +187,8 @@ summarise(kills, manifest) → { mean, min, max, perRule: Record<Rule, { killed,
 7. `llm.ts` (interface + `TemplateLlm`)
 8. scorer `manifest.ts`, `kills.ts`, `report.ts` + P7, using the fixture manifest
 9. `pnpm test` and `pnpm lint` green → commit and push
+
+## Review-driven additions (18 Nov 2026)
+
+- Give the oracles a shared `Evidence` shape and a `Finding` record (`title, rule, oracle, harm, evidence, steps, seed`). The `FakeDriver` supplies enough to populate these in tests. Screenshot/trace handles are placeholders here — real browser capture lands with the `PlaywrightDriver` in S05 — but the schema is frozen now.
+- The scorer records `{detected, verified, killed}` per (mutant, seed). The run-count / variance / time reporting and the machine-readable `benchmark-results.json` are S05/S08, but the per-finding fields they aggregate are produced here.

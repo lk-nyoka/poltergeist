@@ -11,6 +11,11 @@
     "file://.kiro/steering/ghost-glitch.md",
     "file://.kiro/steering/mutants.md"
   ],
+  "tools": [
+    "read",
+    "write",
+    "shell"
+  ],
   "permissions": {
     "rules": [
       {

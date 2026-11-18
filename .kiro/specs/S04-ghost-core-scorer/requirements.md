@@ -65,3 +65,15 @@ S04 builds the browser-independent core. Ghosts (S06/S07), the Playwright driver
 - AC-1: P1, P2 and P7 pass as property tests (tasks marked required).
 - AC-2: Each of the 10 oracles has a fires-on-fault and a silent-on-clean test.
 - AC-3: `pnpm test` and `pnpm lint` pass; ghost-core has no DOM, Next or Playwright imports.
+
+## Review-driven additions (18 Nov 2026)
+
+From two external design reviews. These sharpen S04 without widening its scope.
+
+### R9 — Structured findings and evidence (for death certificates)
+- WHEN an oracle fires, THE result SHALL become a structured `Finding` carrying: a plain-English title, the rule (`Cn`) and mapped oracle, a one-line user/business harm, the evidence (the oracle's numbers/element/token, a screenshot or trace handle, and any console / network / 5xx record), the recorded `Step` list as a reproduction recipe, and the haunting seed.
+- THIS schema SHALL be fixed in S04 even though the death-certificate UI is S11, so nothing downstream has to change later.
+
+### R10 — Detected vs killed
+- THE scorer SHALL distinguish **detected** (a mapped oracle fired at all) from **killed** (the finding is verified on replay AND the clean-replay is silent).
+- BOTH SHALL be recorded per (mutant, seed). Only killed counts toward the kill rate, but detected-not-killed SHALL be reported too.

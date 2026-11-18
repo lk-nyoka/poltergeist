@@ -10,6 +10,12 @@
     "file://.kiro/steering/ghost-nightowl.md",
     "file://.kiro/steering/ghost-glitch.md"
   ],
+  "tools": [
+    "read",
+    "write",
+    "shell",
+    "web"
+  ],
   "permissions": {
     "rules": [
       {
