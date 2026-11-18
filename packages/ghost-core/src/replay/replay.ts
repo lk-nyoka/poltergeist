@@ -15,8 +15,11 @@ import { resolvePlaceholders, type KnownValues } from '../record/recorder';
 
 export type ReplayDeps = { driver: Driver; observer: ShopObserver };
 
-/** `cloneOf` the haunting session (same mutant set), or `clean` (no mutants). */
-export type ReplayBase = { cloneOf: string } | { clean: true };
+/**
+ * `cloneOf` the haunting session (same mutant set), `clean` (no mutants), or an explicit mutant set
+ * (`mutantIds`, benchmark and oracle-level mutant-check only; the shop needs BENCH_MODE=1 for it).
+ */
+export type ReplayBase = { cloneOf: string } | { clean: true } | { mutantIds: string[] };
 
 export type ReplayOptions = {
   /** Keep only hits from this oracle (the finding's oracle). Omit to keep every oracle's hits. */

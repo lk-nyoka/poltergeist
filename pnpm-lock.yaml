@@ -349,6 +349,15 @@ importers:
 
   packages/scorer:
     dependencies:
+      '@poltergeist/cli':
+        specifier: workspace:*
+        version: link:../cli
+      '@poltergeist/driver-playwright':
+        specifier: workspace:*
+        version: link:../driver-playwright
+      '@poltergeist/ghost-core':
+        specifier: workspace:*
+        version: link:../ghost-core
       '@poltergeist/protocol':
         specifier: workspace:*
         version: link:../protocol

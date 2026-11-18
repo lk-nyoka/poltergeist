@@ -11,7 +11,8 @@
     "test:prop": "turbo test:prop",
     "lint": "turbo lint",
     "dev": "turbo dev",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "bench:run": "pnpm --filter @poltergeist/scorer run bench:run"
   },
   "devDependencies": {
     "turbo": "2.11.10",

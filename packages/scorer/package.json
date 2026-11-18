@@ -10,9 +10,14 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:prop": "vitest run prop.test",
-    "mutant-check": "tsx src/mutant-check.ts"
+    "mutant-check": "tsx src/mutant-check.ts",
+    "mutant-check:oracles": "tsx --env-file=../../apps/shop/.env.local src/mutant-check.ts --oracles",
+    "bench:run": "tsx --env-file=../../apps/shop/.env.local src/bench-run.ts"
   },
   "dependencies": {
+    "@poltergeist/cli": "workspace:*",
+    "@poltergeist/driver-playwright": "workspace:*",
+    "@poltergeist/ghost-core": "workspace:*",
     "@poltergeist/protocol": "workspace:*"
   }
 }

@@ -154,6 +154,102 @@ const emptyReport = (opts: HauntOptions): HauntReport => ({
 
 const sleepMs = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
+// ── Investigation: the part the benchmark runner shares ─────────────────────────────────────────
+export type InvestigationInput = {
+  launched: Launched;
+  kind: TargetKind;
+  seed: number;
+  ghostIds: GhostId[];
+  budgetSeconds: number;
+  arrival: string;
+  ghosts: HauntDeps['ghosts'];
+  log: (line: string) => void;
+  /** Replays per finding. Default 3. */
+  replays?: number;
+};
+
+export type InvestigatedFinding = {
+  finding: Finding;
+  /** The oracle fired again on at least one replay. */
+  verified: boolean;
+  reproduction: { fired: number; replays: number; rate: number };
+  /** Clean replay silent (Haunted Shop only); null off the shop, false when not verified. */
+  cleanSilent: boolean | null;
+};
+
+export type Investigation = {
+  results: InvestigatedFinding[];
+  ghosts: { ran: GhostId[]; skipped: GhostId[] };
+  /** Session token of the haunting, for cloneOf replays. */
+  hauntingToken: string;
+};
+
+/**
+ * Arrival walk, the available ghosts, the oracles over everything observed, then replay verification
+ * (and the clean replay on the Haunted Shop). The session the driver was launched with is the haunting.
+ */
+export async function investigate(input: InvestigationInput): Promise<Investigation> {
+  const { launched, kind, log } = input;
+  const rec = new RecordingDriver(launched.driver, { seed: input.seed, ...(kind === 'shop' ? { observer: launched.observer } : {}) });
+  const observer = kind === 'shop' ? launched.observer : emptyObserver;
+  const events: PageEvent[] = [];
+  rec.onEvent((e) => events.push(e));
+  const axe = new Map<string, AxeViolation>();
+  const scan = async () => {
+    for (const v of await rec.axe()) axe.set(`${v.id}|${v.targets.join(',')}`, v);
+  };
+  const ghosts: Investigation['ghosts'] = { ran: [], skipped: [] };
+
+  // Arrival, then each available ghost within its budget.
+  log(`Arriving at ${input.arrival}`);
+  await rec.goto(input.arrival);
+  await scan();
+  for (const id of input.ghostIds) {
+    const ghost = input.ghosts[id];
+    if (!ghost) {
+      ghosts.skipped.push(id);
+      log(`Ghost ${id}: not available yet, skipped.`);
+      continue;
+    }
+    const budgetMs = input.budgetSeconds * 1000;
+    const deadline = Date.now() + budgetMs;
+    log(`Ghost ${id}: haunting for up to ${input.budgetSeconds}s.`);
+    const done = ghost.run({ driver: rec, observer, kind, seed: input.seed, budgetMs, deadline, log }).then(() => 'done' as const);
+    const outcome = await Promise.race([done, sleepMs(budgetMs + 5000).then(() => 'late' as const)]);
+    if (outcome === 'late') log(`Ghost ${id}: over budget, moving on.`);
+    ghosts.ran.push(id);
+    await scan();
+  }
+
+  // Oracles over everything observed.
+  const hauntingToken = rec.sessionToken();
+  const steps = rec.stepsSinceFreshSession();
+  const obs: Observation =
+    kind === 'shop'
+      ? await observe(observer, hauntingToken, { events, axe: [...axe.values()] })
+      : siteObservation({ events, axe: [...axe.values()] });
+  const hits = kind === 'shop' ? runOracles(obs) : runSiteOracles(obs);
+  const findings = toFindings(hits, obs, { steps, seed: input.seed });
+  log(`Oracles fired ${findings.length} time(s); verifying by replay.`);
+
+  // Replay verification, plus the clean replay on the Haunted Shop.
+  const replayDeps = { driver: launched.driver, observer };
+  const results: InvestigatedFinding[] = [];
+  for (const finding of findings) {
+    const v = await verify(finding, replayDeps, { base: hauntingToken, ...(input.replays !== undefined ? { replays: input.replays } : {}) });
+    const reproduction = { fired: v.fired, replays: v.replays, rate: v.reproductionRate };
+    if (!v.verified) {
+      log(`  not reproduced: ${finding.oracle} ${finding.rule}`);
+      results.push({ finding, verified: false, reproduction, cleanSilent: kind === 'shop' ? false : null });
+      continue;
+    }
+    const cleanSilent = kind === 'shop' ? (await cleanReplay(finding, replayDeps)).silent : null;
+    results.push({ finding, verified: true, reproduction, cleanSilent });
+    log(`  verified ${v.fired}/${v.replays}: ${finding.oracle} ${finding.rule} (${SEVERITY[finding.oracle]})`);
+  }
+  return { results, ghosts, hauntingToken };
+}
+
 // ── The haunting ──────────────────────────────────────────────────────────────────────────────────
 export async function haunt(opts: HauntOptions, deps: HauntDeps): Promise<HauntResult> {
   const report = emptyReport(opts);
@@ -206,67 +302,22 @@ export async function haunt(opts: HauntOptions, deps: HauntDeps): Promise<HauntR
   }
 
   try {
-    const rec = new RecordingDriver(launched.driver, { seed: opts.seed, ...(kind === 'shop' ? { observer: launched.observer } : {}) });
-    const observer = kind === 'shop' ? launched.observer : emptyObserver;
-    const events: PageEvent[] = [];
-    rec.onEvent((e) => events.push(e));
-    const axe = new Map<string, AxeViolation>();
-    const scan = async () => {
-      for (const v of await rec.axe()) axe.set(`${v.id}|${v.targets.join(',')}`, v);
-    };
-
-    // 4. Arrival, then each available ghost within its budget.
-    log(`Arriving at ${arrival}`);
-    await rec.goto(arrival);
-    await scan();
-    for (const id of opts.ghosts) {
-      const ghost = deps.ghosts[id];
-      if (!ghost) {
-        report.ghosts.skipped.push(id);
-        log(`Ghost ${id}: not available yet, skipped.`);
-        continue;
-      }
-      const budgetMs = opts.budget * 1000;
-      const deadline = Date.now() + budgetMs;
-      log(`Ghost ${id}: haunting for up to ${opts.budget}s.`);
-      const done = ghost.run({ driver: rec, observer, kind, seed: opts.seed, budgetMs, deadline, log }).then(() => 'done' as const);
-      const outcome = await Promise.race([done, sleepMs(budgetMs + 5000).then(() => 'late' as const)]);
-      if (outcome === 'late') log(`Ghost ${id}: over budget, moving on.`);
-      report.ghosts.ran.push(id);
-      await scan();
-    }
-
-    // 5. Oracles over everything observed.
-    const hauntingToken = rec.sessionToken();
-    const steps = rec.stepsSinceFreshSession();
-    const obs: Observation =
-      kind === 'shop'
-        ? await observe(observer, hauntingToken, { events, axe: [...axe.values()] })
-        : siteObservation({ events, axe: [...axe.values()] });
-    const hits = kind === 'shop' ? runOracles(obs) : runSiteOracles(obs);
-    const findings = toFindings(hits, obs, { steps, seed: opts.seed });
-    log(`Oracles fired ${findings.length} time(s); verifying by replay.`);
-
-    // 6. Replay verification (3 replays), plus the clean replay on the Haunted Shop.
-    const replayDeps = { driver: launched.driver, observer };
-    const verified: VerifiedFinding[] = [];
-    for (const finding of findings) {
-      const v = await verify(finding, replayDeps, { base: hauntingToken });
-      if (!v.verified) {
-        report.unverified += 1;
-        log(`  not reproduced, dropped: ${finding.oracle} ${finding.rule}`);
-        continue;
-      }
-      const cleanSilent = kind === 'shop' ? (await cleanReplay(finding, replayDeps)).silent : null;
-      verified.push({
-        finding,
-        severity: SEVERITY[finding.oracle],
-        reproduction: { fired: v.fired, replays: v.replays, rate: v.reproductionRate },
-        cleanSilent,
-      });
-      log(`  verified ${v.fired}/${v.replays}: ${finding.oracle} ${finding.rule} (${SEVERITY[finding.oracle]})`);
-    }
-
+    const inv = await investigate({
+      launched,
+      kind,
+      seed: opts.seed,
+      ghostIds: opts.ghosts,
+      budgetSeconds: opts.budget,
+      arrival,
+      ghosts: deps.ghosts,
+      log,
+    });
+    report.ghosts = inv.ghosts;
+    const hauntingToken = inv.hauntingToken;
+    report.unverified = inv.results.filter((r) => !r.verified).length;
+    const verified: VerifiedFinding[] = inv.results
+      .filter((r) => r.verified)
+      .map((r) => ({ finding: r.finding, severity: SEVERITY[r.finding.oracle], reproduction: r.reproduction, cleanSilent: r.cleanSilent }));
     // 7. Certificates and generated tests (not in --bench mode).
     const ctx: CertificateContext = {
       target: baseUrl,

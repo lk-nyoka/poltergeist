@@ -75,6 +75,14 @@ Starts its own shop (build if missing — build time excluded from the 300 s bud
 - Generated tests assert Crash, ScriptExecution, A11yViolation, DoubleCharge and PrivacyLeak. The other oracles get `test.fixme` until their assertions are written.
 - `--bench`: one JSON line on stdout, progress on stderr, nothing written to disk.
 
+## Scorer decisions (S05 batch 3)
+- **Oracle-level check:** `pnpm --filter @poltergeist/scorer mutant-check:oracles` (or `mutant-check --oracles`, `--all` for both levels). The contract tests are API-level Vitest files, so each rule's actions live as a hand-written Step recipe in `packages/scorer/src/oracle-check/recipes.ts` (API requests for set-up, structural selectors on pages, no accessible names). Per entry: replay on `{mutantIds:[id]}` and `{clean:true}`; ok = a mapped oracle fires on the mutant and none fires on clean; wrong-rule = only unmapped oracles fired; undetected = nothing fired, the run failed, or a mapped oracle also fired on clean. clean-suite PASS = no oracle fires on any clean replay. Counts only.
+- **Recipes are unvalidated against the real shop until `mutant-maker` runs the check.** Expect to adjust them then.
+- **`ReplayBase`** in ghost-core also accepts `{mutantIds}` (benchmark and the oracle-level check only).
+- **Benchmark runner:** `pnpm bench:run --mutants all|<n> --seeds 1,2,3 [--budget 60]`. Pool = non-public mutants by sorted id. Each (mutant, seed) opens a `{mutantIds:[id]}` session and runs the CLI's shared `investigate()` (arrival walk, available ghosts, oracles, 3 replays, clean replay). Kills come from the scorer (`decideOutcomes`). A run that throws counts as tested with no findings. stdout is `Cn killed/tested` lines plus the overall figure.
+- **Private output:** `bench/.private/runs/<timestamp>/` holds `benchmark-results.json`, `leaderboard.md` and `runs.json`. `privateWriter` refuses any directory outside `bench/.private`.
+- **`report.ts`:** per tool, counts of detected/verified/killed over (mutant, seed) runs, mean kill rate across seeds with min, max, population variance and std dev, median over mutants of each mutant's mean time, per-rule table, survivors and baseline wins. The baseline column stays "not run yet" until S08.
+
 ## Dependencies (S05 batch 1)
 - `playwright@1.65.0` (`packages/driver-playwright`): the headless Chromium library the PlaywrightDriver is built on; same version the shop already pins for `@playwright/test`.
 - `axe-core@4.14.0` (`packages/driver-playwright`): the accessibility scan behind `Driver.axe()`; same version the shop already pins.
