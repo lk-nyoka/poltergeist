@@ -17,3 +17,4 @@ export {
   type TargetKind,
 } from './site-oracles';
 export { httpPossess, type ShopPossessConfig } from './shop-possess';
+export { emptyObserver, httpObserver, isHauntedShop, type HttpObserverConfig } from './http-observer';

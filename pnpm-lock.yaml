@@ -306,7 +306,17 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
-  packages/cli: {}
+  packages/cli:
+    dependencies:
+      '@poltergeist/driver-playwright':
+        specifier: workspace:*
+        version: link:../driver-playwright
+      '@poltergeist/ghost-core':
+        specifier: workspace:*
+        version: link:../ghost-core
+      '@poltergeist/protocol':
+        specifier: workspace:*
+        version: link:../protocol
 
   packages/driver-dom: {}
 

@@ -52,6 +52,7 @@ export class PlaywrightDriver implements Driver {
   private page!: Page;
   private token = '';
   private listeners = new Set<(e: PageEvent) => void>();
+  private boundaryShown = false;
   private readonly base: URL;
 
   private constructor(private readonly opts: PlaywrightDriverOptions) {
@@ -146,6 +147,7 @@ export class PlaywrightDriver implements Driver {
       this.emit('beacon', String(token));
     });
 
+    this.boundaryShown = false;
     this.page = await this.context.newPage();
     this.page.on('pageerror', (err) => this.emit('pageerror', err.message));
     this.page.on('response', (res) => {
@@ -156,8 +158,25 @@ export class PlaywrightDriver implements Driver {
   }
 
   // ── Driver: actions ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * Emits `errorBoundary` once each time the shop's error boundary (`data-error-boundary="true"`)
+   * appears on the page. Read from Node, so a page cannot fake it by calling an exposed function.
+   */
+  private async checkBoundary(): Promise<void> {
+    let shown: boolean;
+    try {
+      shown = (await this.page.evaluate(`!!document.querySelector('[data-error-boundary="true"]')`)) === true;
+    } catch {
+      return; // the page navigated away mid-check; the next action checks again
+    }
+    if (shown && !this.boundaryShown) this.emit('errorBoundary', await this.currentPath());
+    this.boundaryShown = shown;
+  }
+
   async goto(path: string): Promise<void> {
+    this.boundaryShown = false;
     await this.page.goto(this.url(path), { waitUntil: 'load' });
+    await this.checkBoundary();
   }
 
   private locate(t: Locator): PwLocator {
@@ -191,22 +210,29 @@ export class PlaywrightDriver implements Driver {
         break;
       }
     }
+    await this.checkBoundary();
   }
 
   async type(target: Locator, text: string): Promise<void> {
     await this.locate(target).fill(text);
+    await this.checkBoundary();
   }
 
   async press(key: 'Tab' | 'Shift+Tab' | 'Enter' | 'Escape'): Promise<void> {
     await this.page.keyboard.press(key);
+    await this.checkBoundary();
   }
 
   async back(): Promise<void> {
+    this.boundaryShown = false;
     await this.page.goBack({ waitUntil: 'load' });
+    await this.checkBoundary();
   }
 
   async reload(): Promise<void> {
+    this.boundaryShown = false;
     await this.page.reload({ waitUntil: 'load' });
+    await this.checkBoundary();
   }
 
   async request(
@@ -248,6 +274,7 @@ export class PlaywrightDriver implements Driver {
   async axe(): Promise<AxeViolation[]> {
     // page.evaluate is not subject to the page's CSP, unlike injecting a <script> element.
     await this.page.evaluate('if (typeof axe === "undefined") {\n' + loadAxe() + '\n}');
+    await this.checkBoundary();
     return (await this.page.evaluate(AXE_RUN_SCRIPT)) as AxeViolation[];
   }
 

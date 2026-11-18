@@ -5,10 +5,17 @@
   "type": "module",
   "exports": { ".": "./src/index.ts" },
   "types": "./src/index.ts",
+  "bin": { "poltergeist": "./src/bin.ts" },
   "scripts": {
     "build": "tsc -p . --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:prop": "vitest run prop.test"
+    "test:prop": "vitest run prop.test",
+    "poltergeist": "tsx src/bin.ts"
+  },
+  "dependencies": {
+    "@poltergeist/driver-playwright": "workspace:*",
+    "@poltergeist/ghost-core": "workspace:*",
+    "@poltergeist/protocol": "workspace:*"
   }
 }

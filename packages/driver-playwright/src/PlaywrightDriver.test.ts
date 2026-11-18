@@ -28,6 +28,9 @@ beforeAll(async () => {
     if (req.url === '/boom') {
       res.setHeader('content-type', 'text/html');
       res.end('<script>throw new Error("kaboom")</script>');
+    } else if (req.url === '/boundary') {
+      res.setHeader('content-type', 'text/html');
+      res.end('<div role="alert" data-error-boundary="true"><h1>Something went wrong</h1></div>');
     } else if (req.url === '/api/echo') {
       res.setHeader('content-type', 'application/json');
       res.end(JSON.stringify({ cookie: req.headers.cookie ?? null }));
@@ -124,6 +127,17 @@ describe.skipIf(!haveBrowser)('PlaywrightDriver on a non-shop site (real Chromiu
     expect(res.status).toBe(503);
     expect(events.map((e) => e.kind)).toEqual(expect.arrayContaining(['pageerror', 'http5xx']));
     expect(runSiteOracles(siteObservation({ events })).map((h) => h.oracle)).toContain('Crash');
+  }, 30_000);
+
+  it('emits errorBoundary once when the shop error boundary renders, and the Crash oracle fires', async () => {
+    events.length = 0;
+    await d.goto('/boundary');
+    await d.query('h1');
+    expect(events.filter((e) => e.kind === 'errorBoundary')).toEqual([expect.objectContaining({ detail: '/boundary' })]);
+    expect(runSiteOracles(siteObservation({ events })).map((h) => h.oracle)).toContain('Crash');
+    events.length = 0;
+    await d.goto('/');
+    expect(events.filter((e) => e.kind === 'errorBoundary')).toEqual([]);
   }, 30_000);
 
   it('request() returns parsed JSON', async () => {

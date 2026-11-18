@@ -2,8 +2,8 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
-# esbuild (via tsx/vite) ships a trusted postinstall that just links its platform binary.
-# Approve it so pnpm runs it instead of reporting an ignored build. If this still warns,
-# run `pnpm approve-builds` and approve esbuild — that writes the exact setting your pnpm needs.
-onlyBuiltDependencies:
-  - esbuild
+# pnpm 12 asks, per dependency, whether to run its postinstall build script. Answer it explicitly
+# so pnpm stops re-scaffolding this block and stops warning. esbuild works via its prebuilt platform
+# binary (installed as an optional dependency), so its own build script can be skipped.
+allowBuilds:
+  esbuild: false

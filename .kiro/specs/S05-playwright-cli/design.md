@@ -65,6 +65,16 @@ This harness is a **measurement instrument**: it runs a generic agent against th
 
 Starts its own shop (build if missing — build time excluded from the 300 s budget — then `next start` on 3000 with `BENCH_MODE=1`, wait `/api/health`, stop on exit), runs 1 committed seed at `--budget 15` per ghost on the 3 lowest-sorted-id non-public mutants, prints only the aggregate kill rate, finishes < 300 s. The `smoke-haunt` hook (S06) and GitHub Actions call this.
 
+## CLI decisions (S05 batch 2)
+- Run from a clone: `pnpm --filter @poltergeist/cli poltergeist haunt <url> [flags]`. Exit codes: 0 ok, 1 Critical finding, 2 refused or bad usage, 3 failure.
+- The per-run token is printed first. `POLTERGEIST_OWNERSHIP_TOKEN` (16+ chars) lets the operator place the file in advance; the gate still verifies it.
+- Shop detection: `SEANCE_SERVER_SECRET` set and `/api/oracle/products` answers. Otherwise the target is a plain site (DOM/HTTP oracles only, no `ShopObserver`).
+- `--possess clean|demo` (shop only, default clean) picks the possession; there is no flag that skips the gate.
+- Every haunting starts with an arrival walk (`goto` the URL path, axe scan) so the pipeline has something to observe before the ghosts exist. Ghosts register in `GHOSTS` (S06/S07).
+- Severity: Critical = DoubleCharge, TillLoss, QuantityBreach, PrivacyLeak, ScriptExecution; High = StateLoss, Crash, TextCorruption; Medium = A11yViolation, FocusFailure.
+- Generated tests assert Crash, ScriptExecution, A11yViolation, DoubleCharge and PrivacyLeak. The other oracles get `test.fixme` until their assertions are written.
+- `--bench`: one JSON line on stdout, progress on stderr, nothing written to disk.
+
 ## Dependencies (S05 batch 1)
 - `playwright@1.65.0` (`packages/driver-playwright`): the headless Chromium library the PlaywrightDriver is built on; same version the shop already pins for `@playwright/test`.
 - `axe-core@4.14.0` (`packages/driver-playwright`): the accessibility scan behind `Driver.axe()`; same version the shop already pins.
