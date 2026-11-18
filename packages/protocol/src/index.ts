@@ -32,3 +32,5 @@ export * from './manifest';
 export * from './possess';
 export * from './api';
 export * from './step';
+export * from './oracles';
+export * from './finding';

@@ -322,7 +322,8 @@ export class FakeShop {
       if (!c) return acc;
       return acc + (c.kind === 'fixed' ? (c.cents ?? 0) : (sub * (c.percent ?? 0)) / 100);
     }, 0);
-    const raw = sub - Math.min(discount, sub);
+    // The cap only matters for valid carts (sub ≥ 0); with an accepted negative quantity the total stays negative.
+    const raw = sub - Math.min(discount, Math.max(sub, 0));
     return s.faults.has('noRounding') ? raw : Math.floor(raw + 0.5 + 1e-9);
   }
 
