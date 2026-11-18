@@ -9,6 +9,14 @@
     "build": "tsc -p . --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:prop": "vitest run prop.test"
+    "test:prop": "vitest run prop.test",
+    "browser:install": "playwright install chromium",
+    "smoke:shop": "tsx --env-file=../../apps/shop/.env.local scripts/shop-smoke.ts"
+  },
+  "dependencies": {
+    "@poltergeist/ghost-core": "workspace:*",
+    "@poltergeist/protocol": "workspace:*",
+    "axe-core": "4.14.0",
+    "playwright": "1.65.0"
   }
 }

@@ -310,7 +310,20 @@ importers:
 
   packages/driver-dom: {}
 
-  packages/driver-playwright: {}
+  packages/driver-playwright:
+    dependencies:
+      '@poltergeist/ghost-core':
+        specifier: workspace:*
+        version: link:../ghost-core
+      '@poltergeist/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      axe-core:
+        specifier: 4.14.0
+        version: 4.14.0
+      playwright:
+        specifier: 1.65.0
+        version: 1.65.0
 
   packages/ghost-core:
     dependencies:

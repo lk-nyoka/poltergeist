@@ -2,8 +2,8 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
-# esbuild (pulled in by tsx) only re-checks its platform binary in its postinstall, and pnpm
-# already installs that binary as an optional dependency, so skipping the build script is safe.
-# Listing it here is the correct pnpm 10+ way to acknowledge that and stop the ignored-build warning.
-ignoredBuiltDependencies:
+# esbuild (via tsx/vite) ships a trusted postinstall that just links its platform binary.
+# Approve it so pnpm runs it instead of reporting an ignored build. If this still warns,
+# run `pnpm approve-builds` and approve esbuild — that writes the exact setting your pnpm needs.
+onlyBuiltDependencies:
   - esbuild

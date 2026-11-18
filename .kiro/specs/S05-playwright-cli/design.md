@@ -65,6 +65,11 @@ This harness is a **measurement instrument**: it runs a generic agent against th
 
 Starts its own shop (build if missing — build time excluded from the 300 s budget — then `next start` on 3000 with `BENCH_MODE=1`, wait `/api/health`, stop on exit), runs 1 committed seed at `--budget 15` per ghost on the 3 lowest-sorted-id non-public mutants, prints only the aggregate kill rate, finishes < 300 s. The `smoke-haunt` hook (S06) and GitHub Actions call this.
 
+## Dependencies (S05 batch 1)
+- `playwright@1.65.0` (`packages/driver-playwright`): the headless Chromium library the PlaywrightDriver is built on; same version the shop already pins for `@playwright/test`.
+- `axe-core@4.14.0` (`packages/driver-playwright`): the accessibility scan behind `Driver.axe()`; same version the shop already pins.
+- Browser binary: `pnpm --filter @poltergeist/driver-playwright browser:install` (`playwright install chromium`).
+
 ## Done-criteria checks
 - `pnpm --filter @poltergeist/cli test` — ownership gate + CLI wiring unit tests pass.
 - CLI haunts the local shop and writes certificates.
