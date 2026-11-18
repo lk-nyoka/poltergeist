@@ -31,3 +31,4 @@ export function isWellFormedOverride(o: MutantOverride): boolean {
 export * from './manifest';
 export * from './possess';
 export * from './api';
+export * from './step';

@@ -312,7 +312,11 @@ importers:
 
   packages/driver-playwright: {}
 
-  packages/ghost-core: {}
+  packages/ghost-core:
+    dependencies:
+      '@poltergeist/protocol':
+        specifier: workspace:*
+        version: link:../protocol
 
   packages/protocol:
     dependencies:
